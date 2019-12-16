@@ -1,0 +1,79 @@
+apply plugin:'java'
+apply plugin:'application'
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    implementation name: 'globalplatformpro-19.06.16'
+    implementation name: 'apdu4j-pcsc-19.05.08'
+}
+
+/********** ./gradlew run *************/
+ext {
+    javaMainClass = "dx.App"
+}
+
+application {
+    mainClassName = javaMainClass
+}
+
+run {
+    println "*** hello ****"
+}
+
+/********** ./gradlew runWithJavaExec *************/
+task runWithJavaExec (type: JavaExec) {
+    group = "Execution"
+    description = "Run th emain class with JavaExecTask"
+    classpath = sourceSets.main.runtimeClasspath
+    main = javaMainClass
+}
+
+/************ ./gradlew runWithExec *************/
+// must be below dependencies
+task runWithExec (type: Exec) {
+    dependsOn build
+    group = "Execution"
+    description = "Run the main class with ExecTask"
+    commandLine "java","-classpath",sourceSets.main.runtimeClasspath.getAsPath(),javaMainClass
+}
+
+/********** ./gradlew runWithExecJarOnClassPath ******/
+task runWithExecJarOnClassPath(type: Exec) {
+    dependsOn jar
+    group = "Execution"
+    description = "Run the mainClass from the output jar in classpath with ExecTask"
+    //commandLine "java","-classpath",jar.archiveFile.get(),javaMainClass
+    commandLine "java",
+        "-classpath",
+        "build/libs/small.jar:libs/apdu4j-pcsc-19.05.08.jar:libs/globalplatformpro-19.06.16.jar",
+        javaMainClass
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class':'dx.App'
+    }
+}
+
+/********* ./gradlew runWithExecJarExecutable *********/
+// the least flexible ?
+task runWithExecJarExecutable (type: Exec) {
+    dependsOn jar
+    group = "Execution"
+    description = "Run the output executable jar with ExecTask"
+    commandLine "java","-jar",jar.archiveFile.get()
+}
+
+task doit (type: JavaExec, dependsOn: classes) {
+    if (project.hasProperty('myargs')) {
+        args(myargs.split(','))
+    }
+    description = "Secure algorithm testing"
+    main = "dx.App"
+    classpath = sourceSets.main.runtimeClasspath
+}
