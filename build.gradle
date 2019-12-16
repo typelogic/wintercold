@@ -1,7 +1,10 @@
+import dx.grrr.Sys;
+
 apply plugin:'java'
 apply plugin:'application'
 
 repositories {
+    jcenter()
     flatDir {
         dirs 'libs'
     }
@@ -10,6 +13,7 @@ repositories {
 dependencies {
     implementation name: 'globalplatformpro-19.06.16'
     implementation name: 'apdu4j-pcsc-19.05.08'
+    implementation 'com.google.guava:guava:28.0-jre'
 }
 
 /********** ./gradlew run *************/
@@ -76,4 +80,18 @@ task doit (type: JavaExec, dependsOn: classes) {
     description = "Secure algorithm testing"
     main = "dx.App"
     classpath = sourceSets.main.runtimeClasspath
+}
+
+/**************** dx.grrr.Sys ********************/
+task test1 (type: Sys, dependsOn: "test2") {
+    msg = "from test1"
+    doLast {
+        println "COUNTER = " + counter
+    }
+}
+
+task test2 (type: Sys) {
+    doLast {
+        println "msg = " + msg
+    }
 }
